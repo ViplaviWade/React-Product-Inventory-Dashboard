@@ -1,3 +1,17 @@
+import React, { useState } from 'react';
+
+function FilterableProductTable(products) {
+
+	const [filterText, setFilterText] = useState('')
+	const [inStockOnly, setInStockOnly] = useState(false)
+
+	return (<div>
+		<SearchBar filterText={filterText} inStockOnly={inStockOnly} 
+			onFilterTextChange={setFilterText} onInStockOnlyChange={setInStockOnly}/>
+		<ProductTable products = {products} filterText={filterText} inStockOnly={inStockOnly} />
+	</div>)
+}
+
 function ProductRow({product}) {
 	const name = product.stocked ? (product.name) : (<span style={{color:"red"}}>{product.name}</span>)
 	return(
@@ -11,31 +25,44 @@ function ProductRow({product}) {
 function ProductCategoryRow({category}) {
 	return(
 		<tr>
-			<th colspan="2">{category}</th>
+			<th colSpan="2">{category}</th>
 		</tr>
 	)
 }
 
-function ProductTable({products}) {
+function ProductTable({products, filterText, inStockOnly}) {
 	const rows = []
 	let lastCategory = null
 
 	const productArray = products.products
 
-	if (Array.isArray(productArray)) {
-		productArray.forEach((productArray) => {
-			if(productArray.category !== lastCategory) {
-				console.log("IN")
-				rows.push(<ProductCategoryRow category= {productArray.category} key={productArray.category} />)
-			}
+	productArray.forEach((product) => {
+		if(product.name.toLowerCase().indexOf(filterText.toLowerCase()) === -1) { return;}
+
+		if(inStockOnly && !product.stocked) { return;}
+
+		if (product.category !== lastCategory) {
+			rows.push(<ProductCategoryRow category={product.category} key={product.category} />);
+		}
+	
+		rows.push(<ProductRow product={product} key={product.name} />);
+		lastCategory = product.category;
+	
+	})
+	// if (Array.isArray(productArray)) {
+	// 	productArray.forEach((productArray) => {
+	// 		if(productArray.category !== lastCategory) {
+	// 			console.log("IN")
+	// 			rows.push(<ProductCategoryRow category= {productArray.category} key={productArray.category} />)
+	// 		}
 			
-		rows.push(<ProductRow product={productArray} key={productArray.name} />)
-		console.log(lastCategory)
-		lastCategory = productArray.category
-		})
-	} else {
-		console.log("Products is not an array")
-	}
+	// 	rows.push(<ProductRow product={productArray} key={productArray.name} />)
+	// 	console.log(lastCategory)
+	// 	lastCategory = productArray.category
+	// 	})
+	// } else {
+	// 	console.log("Products is not an array")
+	// }
 
 	return (
 		<table>
@@ -50,17 +77,19 @@ function ProductTable({products}) {
 	)
 }
 
-function SearchBar() {
-	return (<div>
-		<input type = "text" placeholder="Search Products" />
-	</div>)
-}
-
-function FilterableProductTable(products) {
-	return (<div>
-		<SearchBar/>
-		<ProductTable products = {products} />
-	</div>)
+function SearchBar({filterText, inStockOnly, onFilterTextChange, onInStockOnlyChange}) {
+	return (
+		<form>
+		  <input type="text" value={filterText} placeholder="Search..." 
+		  	onChange = { (e)=> onFilterTextChange(e.target.value) }/><br/>
+		  <label>
+			<input type="checkbox" checked={inStockOnly}
+			onChange = { (e)=> onInStockOnlyChange(e.target.checked) }/>
+			{' '}
+			Only show products in stock
+		  </label>
+		</form>
+	);
 }
 
 const PRODUCTS = [
