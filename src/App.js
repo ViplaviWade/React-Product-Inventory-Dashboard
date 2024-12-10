@@ -1,25 +1,77 @@
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+function ProductRow({product}) {
+	const name = product.stocked ? (product.name) : (<span style={{color:"red"}}>{product.name}</span>)
+	return(
+		<tr>
+			<td>{name}</td>
+			<td>{product.price}</td>
+		</tr>
+	)
 }
 
-export default App;
+function ProductCategoryRow({category}) {
+	return(
+		<tr>
+			<th colspan="2">{category}</th>
+		</tr>
+	)
+}
+
+function ProductTable({products}) {
+	const rows = []
+	let lastCategory = null
+
+	const productArray = products.products
+
+	if (Array.isArray(productArray)) {
+		productArray.forEach((productArray) => {
+			if(productArray.category !== lastCategory) {
+				console.log("IN")
+				rows.push(<ProductCategoryRow category= {productArray.category} key={productArray.category} />)
+			}
+			
+		rows.push(<ProductRow product={productArray} key={productArray.name} />)
+		console.log(lastCategory)
+		lastCategory = productArray.category
+		})
+	} else {
+		console.log("Products is not an array")
+	}
+
+	return (
+		<table>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Price</th>
+				</tr>
+			</thead>
+			<tbody>{rows}</tbody>
+		</table>
+	)
+}
+
+function SearchBar() {
+	return (<div>
+		<input type = "text" placeholder="Search Products" />
+	</div>)
+}
+
+function FilterableProductTable(products) {
+	return (<div>
+		<SearchBar/>
+		<ProductTable products = {products} />
+	</div>)
+}
+
+const PRODUCTS = [
+  {category: "Fruits", price: "$1", stocked: true, name:"Apple"},
+  {category: "Fruits", price: "$1", stocked: true, name: "DragonFruit"},
+  {category: "Fruits", price: "$2", stocked: false, name: "PassionFruit"},
+  {category: "Vegetables", price: "$2", stocked: true, name: "Spinach"},
+  {category: "Vegetables", price: "$4", stocked: false, name: "Pumpkin"},
+  {category: "Vegetables", price: "$1", stocked: true, name: "Peas"}
+]
+
+export default function App() {
+  return <FilterableProductTable products = {PRODUCTS} />
+}
